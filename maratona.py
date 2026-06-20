@@ -1,10 +1,6 @@
 import random
 import pandas as pd
 
-# -----------------------------
-# CONFIGURAÇÕES
-# -----------------------------
-
 TOTAL_ATLETAS = 200
 
 nomes_masculinos = [
@@ -50,11 +46,7 @@ premios_pcd = {
 
 categorias_pcd = ["Cadeirante", "Def. Visual", "Amputados", "Não"]
 
-
-# -----------------------------
-# FUNÇÕES
-# -----------------------------
-
+# Gera um nome completo de acordo com o sexo
 def gerar_nome(sexo):
     if sexo == "Masculino":
         nome = random.choice(nomes_masculinos)
@@ -63,15 +55,18 @@ def gerar_nome(sexo):
 
     return nome + " " + random.choice(sobrenomes)
 
+# Define a faixa etária com base na idade
 def definir_faixa(idade):
     for minimo, maximo, faixa in faixas:
         if minimo <= idade <= maximo:
             return faixa
 
+# Gera um tempo aleatório para o atleta
 def gerar_tempo():
     # tempo em minutos
     return round(random.uniform(35, 120), 2)
 
+# Define a premiação por faixa etária
 def medalha_faixa(posicao):
     if posicao == 1:
         return "Troféu + Medalha"
@@ -79,27 +74,29 @@ def medalha_faixa(posicao):
         return "Medalha"
     return ""
 
-
-# -----------------------------
-# GERAR ATLETAS
-# -----------------------------
-
+# Lista que vai armazenar os atletas
 atletas = []
+
+# Conjunto usado para evitar nomes repetidos
 nomes_usados = set()
 
+# Número inicial dos atletas
 i = 1
 
+# Gera atletas até atingir o total definido
 while len(atletas) < TOTAL_ATLETAS:
     idade = random.randint(18, 75)
     sexo = random.choice(["Masculino", "Feminino"])
     pcd = random.choices(categorias_pcd, weights=[3, 3, 3, 91])[0]
     nome = gerar_nome(sexo)
 
+    # Se o nome já foi usado, gera outro atleta
     if nome in nomes_usados:
         continue
 
     nomes_usados.add(nome)
 
+    # Adiciona o atleta na lista
     atletas.append({
     "Número": i,
     "Nome": nome,
@@ -112,23 +109,21 @@ while len(atletas) < TOTAL_ATLETAS:
 
     i += 1
 
+# Cria uma tabela com os atletas
 df = pd.DataFrame(atletas)
 
-# ordenar pelo menor tempo
+# Ordena os atletas pelo menor tempo
 df = df.sort_values(by="Tempo").reset_index(drop=True)
 
 print("LISTA DE ATLETAS")
 print(df)
 
-
-# -----------------------------
-# PREMIAÇÃO GERAL
-# -----------------------------
-
 print("\n>>> PREMIAÇÃO GERAL - MASCULINO E FEMININO <<<")
 
+# Lista da premiação geral
 geral = []
 
+# Separa os vencedores gerais por sexo
 for sexo in ["Masculino", "Feminino"]:
     vencedores = df[df["Sexo"] == sexo].head(5)
 
@@ -146,18 +141,16 @@ for sexo in ["Masculino", "Feminino"]:
             "Medalha Especial": medalha
         })
 
+# Cria a tabela da premiação geral
 df_geral = pd.DataFrame(geral)
 print(df_geral)
 
-
-# -----------------------------
-# PREMIAÇÃO POR FAIXA ETÁRIA
-# -----------------------------
-
 print("\n>>> PREMIAÇÃO POR FAIXA ETÁRIA <<<")
 
+# Lista da premiação por faixa etária
 resultado_faixas = []
 
+# Percorre sexo e faixa etária para premiar os melhores
 for sexo in ["Masculino", "Feminino"]:
     for _, _, faixa in faixas:
         grupo = df[
@@ -176,18 +169,16 @@ for sexo in ["Masculino", "Feminino"]:
                 "Premiação": medalha_faixa(posicao)
             })
 
+# Cria a tabela da premiação por faixa etária
 df_faixas = pd.DataFrame(resultado_faixas)
 print(df_faixas)
 
-
-# -----------------------------
-# PREMIAÇÃO PcD
-# -----------------------------
-
 print("\n>>> PREMIAÇÃO PcD <<<")
 
+# Lista da premiação PcD
 resultado_pcd = []
 
+# Percorre cada categoria PcD
 for categoria in ["Cadeirante", "Def. Visual", "Amputados"]:
     grupo = df[df["Categoria PcD"] == categoria].head(3)
 
@@ -202,15 +193,13 @@ for categoria in ["Cadeirante", "Def. Visual", "Amputados"]:
             "Dinheiro": premios_pcd[posicao]
         })
 
+# Cria a tabela da premiação PcD
 df_pcd = pd.DataFrame(resultado_pcd)
 print(df_pcd)
 
-
-# -----------------------------
-# RESUMO FINAL
-# -----------------------------
-
 print("\n>>> SIMULAÇÃO FINALIZADA <<<")
+
+# Mostra o resumo final da simulação
 print("Total de atletas:", TOTAL_ATLETAS)
 print("Atletas masculinos:", len(df[df["Sexo"] == "Masculino"]))
 print("Atletas femininos:", len(df[df["Sexo"] == "Feminino"]))
